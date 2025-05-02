@@ -4,6 +4,7 @@ import asyncio
 import itertools
 
 from decimal import Decimal
+from typing import Any
 from ha_services.mqtt4homeassistant.components.sensor import Sensor
 from ha_services.mqtt4homeassistant.components.binary_sensor import BinarySensor
 from ha_services.mqtt4homeassistant.components.switch import Switch
@@ -180,7 +181,18 @@ class KronotermMqttHandler:
             assert isinstance(response, WriteSingleRegisterResponse), f'{response=}'
         component.set_state(new_state)
         component.publish_state(client)
-    
+
+    def write_register_callback(self, *, client: Client, component: Sensor, _old_state: str, new_state: str, address: int):
+        value = int(float(new_state) / 0.1)
+        print(f"Writing value {value} to register {address}")
+        response = self.modbus_client.write_register(address=address, value=value, slave=MODBUS_SLAVE_ID)
+
+        if isinstance(response, (ExceptionResponse, ModbusIOException)):
+            logger.error(f'Error: {response}')
+        else:
+            assert isinstance(response, WriteSingleRegisterResponse), f'{response=}'
+        component.set_state(new_state)
+        component.publish_state(client)
 
 
     def ranges(self, i: list) -> list:
@@ -227,6 +239,20 @@ class KronotermMqttHandler:
 
         switches =  { 2327: self.dhw_circulation_switch,
                       2015: self.additional_source_switch}
+        
+        for address in self.sensors:
+            sensor, scale = self.sensors[address]
+
+            def _sensor_callback(client: Client, userdata, message, addr: int = address):
+                new_state = message.payload.decode()
+
+                self.write_register_callback(client=self.mqtt_client, component=sensor, _old_state="", new_state=new_state, address=int(addr) + 1)
+
+            command_topic = f'{sensor.topic_prefix}/command'
+
+            self.mqtt_client.message_callback_add(command_topic, _sensor_callback)
+            print("Registered on topic %s", command_topic)
+            self.mqtt_client.subscribe(command_topic)
         
         print("Kronoterm to MQTT publish loop started...")
         while True:
