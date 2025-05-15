@@ -246,7 +246,7 @@ class KronotermMqttHandler:
             def _sensor_callback(client: Client, userdata, message, addr: int = address):
                 new_state = message.payload.decode()
 
-                self.write_register_callback(client=self.mqtt_client, component=sensor, _old_state="", new_state=new_state, address=int(addr) + 1)
+                self.write_register_callback(client=self.mqtt_client, component=sensor, _old_state="", new_state=new_state, address=int(addr))
 
             command_topic = f'{sensor.topic_prefix}/command'
 
