@@ -46,6 +46,7 @@ class KronotermMqttHandler:
         self.registers  = dict()
         self.dhw_circulation_switch: Switch = None
         self.additional_source_switch: Switch = None
+        self.adaptive_curve_switch_loop_1: Switch = None
 
     def __enter__(self):
         return self
@@ -153,6 +154,7 @@ class KronotermMqttHandler:
         addresses = addresses.union(set(self.binary_sensors.keys()))
         addresses.add(2327) # DHW circulation switch
         addresses.add(2015) # Additional source switch
+        addresses.add(2319) # Adaptive curve callback
         addresses = sorted(addresses.union(set(self.enum_sensors.keys())))
         self.address_ranges = list(self.ranges(list(addresses)))
         if self.verbosity:
