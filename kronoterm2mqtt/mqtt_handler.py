@@ -140,6 +140,12 @@ class KronotermMqttHandler:
             uid='additional_source_switch',
             callback=self.additional_source_callback,
             )
+        self.adaptive_curve_switch_loop_1 = Switch(
+            device=self.main_device,
+            name='Loop 1 adaptive curve'
+            uid="loop_1_adaptive_curve"
+            callback=self.adaptive_curve_callback
+        )
             
 
         # Prepare ranges of registers for faster reads in blocks
@@ -182,7 +188,7 @@ class KronotermMqttHandler:
         component.set_state(new_state)
         component.publish_state(client)
 
-    def adaptive_curve_switch(self, *, client: Client, component: Switch, old_state: str, new_state: str):
+    def adaptive_curve_callback(self, *, client: Client, component: Switch, old_state: str, new_state: str):
         """Switches adaptive heating/cooling curve
         """
         logger.info(f'{component.name} state changed: {old_state!r} -> {new_state!r}')
@@ -253,7 +259,7 @@ class KronotermMqttHandler:
 
         switches =  { 2327: self.dhw_circulation_switch,
                       2015: self.additional_source_switch,
-                      2319: self.adaptive_curve_switch}
+                      2319: self.adaptive_curve_switch_loop_1}
         
         for address in self.sensors:
             sensor, scale = self.sensors[address]
