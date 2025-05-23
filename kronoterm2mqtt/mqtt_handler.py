@@ -142,8 +142,8 @@ class KronotermMqttHandler:
             )
         self.adaptive_curve_switch_loop_1 = Switch(
             device=self.main_device,
-            name='Loop 1 adaptive curve'
-            uid="loop_1_adaptive_curve"
+            name='Loop 1 adaptive curve',
+            uid="loop_1_adaptive_curve",
             callback=self.adaptive_curve_callback
         )
             
