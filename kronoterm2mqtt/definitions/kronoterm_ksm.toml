@@ -231,7 +231,7 @@ state_class = "measurement"
 unit_of_measurement = ""
 scale = 0.01
 
-[[number]]
+[[sensor]]
 name = "Loop 1 heat curve lower point"
 register = 2309
 min = 25.0
@@ -240,7 +240,7 @@ step = 0.5
 unit_of_measurement = "°C"
 scale = 0.1
 
-[[number]]
+[[sensor]]
 name = "Loop 1 heat curve upper point"
 register = 2314
 min = 25.0
@@ -249,7 +249,7 @@ step = 0.5
 unit_of_measurement = "°C"
 scale = 0.1
 
-[[number]]
+[[sensor]]
 name = "Loop 2 heat curve lower point"
 register = 2310
 min = 25.0
@@ -258,7 +258,7 @@ step = 0.5
 unit_of_measurement = "°C"
 scale = 0.1
 
-[[number]]
+[[sensor]]
 name = "Loop 2 heat curve upper point"
 register = 2315
 min = 25.0
@@ -267,7 +267,7 @@ step = 0.5
 unit_of_measurement = "°C"
 scale = 0.1
 
-[[number]]
+[[sensor]]
 name = "Set Desired HW temperature"
 register = 2023
 min = 25.0
