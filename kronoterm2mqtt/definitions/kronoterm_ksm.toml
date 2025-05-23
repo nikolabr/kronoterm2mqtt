@@ -271,6 +271,21 @@ state_class = "measurement"
 unit_of_measurement = "°C"
 scale = 0.1
 
+[[sensor]]
+name = "Loop 1 desired temperature"
+register = 2128
+device_class = "temperature"
+state_class = "measurement"
+unit_of_measurement = "°C"
+scale = 0.1
+
+[[sensor]]
+name = "Loop 2 desired temperature"
+register = 2188
+device_class = "temperature"
+state_class = "measurement"
+unit_of_measurement = "°C"
+scale = 0.1
 
 [[enum_sensor]]
 register = 2001
