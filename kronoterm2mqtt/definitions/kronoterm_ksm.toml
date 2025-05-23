@@ -231,35 +231,48 @@ state_class = "measurement"
 unit_of_measurement = ""
 scale = 0.01
 
-[[sensor]]
-name = "Loop 1 temperature when cold outside"
+[[number]]
+name = "Loop 1 heat curve lower point"
 register = 2309
-device_class = "temperature"
-state_class = "measurement"
+min = 25.0
+max = 50.0
+step = 0.5
 unit_of_measurement = "°C"
 scale = 0.1
 
-[[sensor]]
-name = "Loop 1 temperature when warm outside"
+[[number]]
+name = "Loop 1 heat curve upper point"
 register = 2314
-device_class = "temperature"
-state_class = "measurement"
+min = 25.0
+max = 50.0
+step = 0.5
 unit_of_measurement = "°C"
 scale = 0.1
 
-[[sensor]]
-name = "Loop 2 temperature when cold outside"
+[[number]]
+name = "Loop 2 heat curve lower point"
 register = 2310
-device_class = "temperature"
-state_class = "measurement"
+min = 25.0
+max = 50.0
+step = 0.5
 unit_of_measurement = "°C"
 scale = 0.1
 
-[[sensor]]
-name = "Loop 2 temperature when warm outside"
+[[number]]
+name = "Loop 2 heat curve upper point"
 register = 2315
-device_class = "temperature"
-state_class = "measurement"
+min = 25.0
+max = 50.0
+step = 0.5
+unit_of_measurement = "°C"
+scale = 0.1
+
+[[number]]
+name = "Set Desired HW temperature"
+register = 2023
+min = 25.0
+max = 50.0
+step = 0.5
 unit_of_measurement = "°C"
 scale = 0.1
 
