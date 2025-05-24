@@ -47,6 +47,7 @@ class KronotermMqttHandler:
         self.dhw_circulation_switch: Switch = None
         self.additional_source_switch: Switch = None
         self.adaptive_curve_switch_loop_1: Switch = None
+        self.adaptive_curve_switch_loop_2: Switch = None
 
     def __enter__(self):
         return self
@@ -145,7 +146,13 @@ class KronotermMqttHandler:
             device=self.main_device,
             name='Loop 1 adaptive curve',
             uid="loop_1_adaptive_curve",
-            callback=self.adaptive_curve_callback
+            callback=self.adaptive_curve_loop_1_callback
+        )
+        self.adaptive_curve_switch_loop_2 = Switch(
+            device=self.main_device,
+            name='Loop 2 adaptive curve',
+            uid="loop_2_adaptive_curve",
+            callback=self.adaptive_curve_loop_2_callback
         )
             
 
@@ -155,6 +162,7 @@ class KronotermMqttHandler:
         addresses.add(2327) # DHW circulation switch
         addresses.add(2015) # Additional source switch
         addresses.add(2319) # Adaptive curve callback
+        addresses.add(2320) # Adaptive curve callback
         addresses = sorted(addresses.union(set(self.enum_sensors.keys())))
         self.address_ranges = list(self.ranges(list(addresses)))
         if self.verbosity:
@@ -190,7 +198,7 @@ class KronotermMqttHandler:
         component.set_state(new_state)
         component.publish_state(client)
 
-    def adaptive_curve_callback(self, *, client: Client, component: Switch, old_state: str, new_state: str):
+    def adaptive_curve_loop_1_callback(self, *, client: Client, component: Switch, old_state: str, new_state: str):
         """Switches adaptive heating/cooling curve
         """
         logger.info(f'{component.name} state changed: {old_state!r} -> {new_state!r}')
@@ -203,6 +211,20 @@ class KronotermMqttHandler:
             assert isinstance(response, WriteSingleRegisterResponse), f'{response=}'
         component.set_state(new_state)
         component.publish_state(client)
+
+    def adaptive_curve_loop_2_callback(self, *, client: Client, component: Switch, old_state: str, new_state: str):
+        """Switches adaptive heating/cooling curve
+        """
+        logger.info(f'{component.name} state changed: {old_state!r} -> {new_state!r}')
+
+        value = 1 if new_state == 'ON' else 0
+        response = self.modbus_client.write_register(address=2320, value=value, slave=MODBUS_SLAVE_ID)
+        if isinstance(response, (ExceptionResponse, ModbusIOException)):
+            logger.error(f'Error: {response}')
+        else:
+            assert isinstance(response, WriteSingleRegisterResponse), f'{response=}'
+        component.set_state(new_state)
+        component.publish_state(client) 
 
     def write_register_callback(self, *, client: Client, component: Sensor, _old_state: str, new_state: str, address: int):
         value = int(float(new_state) / 0.1)
@@ -261,7 +283,8 @@ class KronotermMqttHandler:
 
         switches =  { 2327: self.dhw_circulation_switch,
                       2015: self.additional_source_switch,
-                      2319: self.adaptive_curve_switch_loop_1}
+                      2319: self.adaptive_curve_switch_loop_1,
+                      2320: self.adaptive_curve_switch_loop_2}
         
         for address in self.sensors:
             sensor, scale = self.sensors[address]
