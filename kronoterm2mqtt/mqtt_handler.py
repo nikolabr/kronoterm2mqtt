@@ -145,8 +145,8 @@ class KronotermMqttHandler:
             )
         self.home_water_regime_switch = Switch(
             device=self.main_device,
-            name='Home Water Regime',
-            uid='home_water_regime',
+            name='Home water switch',
+            uid='home_water_switch',
             callback=self.home_water_regime_callback,
         )
         self.adaptive_curve_switch_loop_1 = Switch(
