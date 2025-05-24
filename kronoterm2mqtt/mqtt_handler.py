@@ -48,6 +48,7 @@ class KronotermMqttHandler:
         self.additional_source_switch: Switch = None
         self.adaptive_curve_switch_loop_1: Switch = None
         self.adaptive_curve_switch_loop_2: Switch = None
+        self.home_water_regime_switch: Switch = None
 
     def __enter__(self):
         return self
@@ -142,6 +143,12 @@ class KronotermMqttHandler:
             uid='additional_source_switch',
             callback=self.additional_source_callback,
             )
+        self.home_water_regime_switch = Switch(
+            device=self.main_device,
+            name='Home Water Regime',
+            uid='home_water_regime',
+            callback=self.home_water_regime_callback,
+        )
         self.adaptive_curve_switch_loop_1 = Switch(
             device=self.main_device,
             name='Loop 1 adaptive curve',
@@ -161,6 +168,7 @@ class KronotermMqttHandler:
         addresses = addresses.union(set(self.binary_sensors.keys()))
         addresses.add(2327) # DHW circulation switch
         addresses.add(2015) # Additional source switch
+        addresses.add(2025)
         addresses.add(2319) # Adaptive curve callback
         addresses.add(2320) # Adaptive curve callback
         addresses = sorted(addresses.union(set(self.enum_sensors.keys())))
@@ -226,6 +234,20 @@ class KronotermMqttHandler:
         component.set_state(new_state)
         component.publish_state(client) 
 
+    def home_water_regime_callback(self, *, client: Client, component: Switch, old_state: str, new_state: str):
+        """Enables/disables home water operation
+        """
+        logger.info(f'{component.name} state changed: {old_state!r} -> {new_state!r}')
+
+        value = 1 if new_state == 'ON' else 0
+        response = self.modbus_client.write_register(address=2025, value=value, slave=MODBUS_SLAVE_ID)
+        if isinstance(response, (ExceptionResponse, ModbusIOException)):
+            logger.error(f'Error: {response}')
+        else:
+            assert isinstance(response, WriteSingleRegisterResponse), f'{response=}'
+        component.set_state(new_state)
+        component.publish_state(client) 
+
     def write_register_callback(self, *, client: Client, component: Sensor, _old_state: str, new_state: str, address: int):
         value = int(float(new_state) / 0.1)
         print(f"Writing value {value} to register {address}")
@@ -284,7 +306,8 @@ class KronotermMqttHandler:
         switches =  { 2327: self.dhw_circulation_switch,
                       2015: self.additional_source_switch,
                       2319: self.adaptive_curve_switch_loop_1,
-                      2320: self.adaptive_curve_switch_loop_2}
+                      2320: self.adaptive_curve_switch_loop_2,
+                      2025: self.home_water_regime_switch}
         
         for address in self.sensors:
             sensor, scale = self.sensors[address]
